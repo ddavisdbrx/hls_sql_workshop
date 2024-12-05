@@ -159,10 +159,10 @@ At the time of writing, Genie Rooms are not able to be created programmatically,
 
 > ### STEP 1: Create Genie Space
 
-Go to **Genie -> New ** and create the Genie Space using the setting below: 
-Title: CMS Genie Space
+Go to **Genie -> New** and create the Genie Space using the setting below: 
+**Title:** CMS Genie Space
 **Description:**
-**Default Warehouse: ** SQL_Warehouse_Serverless_Warehouse 
+**Default Warehouse: **SQL_Warehouse_Serverless_Warehouse**
 This was the warehouse created by the workflow during setup. If it was not created during setup, please select the name of the warehouse you created manually in previous steps.
 **Tables:** Select all tables from the gold schema
 - dim_beneficiary
