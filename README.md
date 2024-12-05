@@ -1,22 +1,19 @@
-## THIS DOCUMENT IS A WORK IN PRORGRESS. ##
-
 # HLS SQL Workshop on Databricks
 
-The HLS SQL Workshop on Databricks is an implementation of specifications derived from the TPC-DI Benchmark.
-This repo includes multiple implementations and interpretations of the TPC-DI v1.1.0. We suggest executing any of the workflow types on the Databricks Runtime 14.3 or higher.
+The repository is can be used for setting up the Healthcare & Life Sciences SQL Workshop on Databricks.
 
-We suggest executing any of the workflow types on using Serverless compute. If Serverless compute is not available, we suggest using the Databricks Runtime **14.3 LTS** or higher. 
+We suggest executing any of the workflows and DLT using Serverless compute. If Serverless compute is not available, we suggest using the Databricks Runtime **14.3 LTS** or higher. 
 
-## Summary
+## [Summary](#summary)
 
 This guide explores how Databricks' Data Intelligence Platform transforms modern data operations with its powerful Data Warehousing capabilities. It demonstrates ingesting claims data from CMS using Databricks Workflows, highlighting the platform’s scalability, flexibility, and cost efficiency for large-scale data processing.
 
 Key features include:
-  - Databricks SQL: Databricks SQL is the intelligent data warehouse. Built with DatabricksIQ, the Data Intelligence Engine that understands the uniqueness of your data, Databricks SQL democratizes analytics for technical and business users alik
-  - Unity Catalog: A unified governance solution for data and AI assets on Databricks that provides centralized access control, auditing, lineage, and data discovery capabilities across Databricks.
-  - DatabricksIQ: Data Intelligence Engine that uses AI to power all parts of the Databricks Data Intelligence Platform. It uses signals across your entire Databricks environment, including Unity Catalog, dashboards, notebooks, data pipelines and documentation to create highly specialized and accurate generative AI models that understand your data, your usage patterns and your business terminology.
-  - AI/BI Dashboards: Easy-to-create, shareable dashboards built on governed data to drive informed decision-making across teams.
-  - Genie Feature: Natural language interaction with data, simplifying access and democratizing data usage within organizations.
+  - **Databricks SQL**: Databricks SQL is the intelligent data warehouse. Built with DatabricksIQ, the Data Intelligence Engine that understands the uniqueness of your data, Databricks SQL democratizes analytics for technical and business users alik
+  - **Unity Catalog**: A unified governance solution for data and AI assets on Databricks that provides centralized access control, auditing, lineage, and data discovery capabilities across Databricks.
+  - **DatabricksIQ**: Data Intelligence Engine that uses AI to power all parts of the Databricks Data Intelligence Platform. It uses signals across your entire Databricks environment, including Unity Catalog, dashboards, notebooks, data pipelines and documentation to create highly specialized and accurate generative AI models that understand your data, your usage patterns and your business terminology.
+  - **AI/BI Dashboards**: Easy-to-create, shareable dashboards built on governed data to drive informed decision-making across teams.
+  - **Genie**: Natural language interaction with data, simplifying access and democratizing data usage within organizations.
 
 The workshop showcases how Databricks enables efficient, governed, and accessible data management for enterprise-grade solutions.
 
@@ -33,10 +30,11 @@ In order to properly setup and successfully run the workshop, there are several 
 - Access to GitHub via public internet access.
 - Access to Serverless compute or compute using Databricks Runtime **14.3 LTS**
 - Unity Catalog enabled.  
-# Workshop Setup
+
+# [Workshop Setup](#workshop-setup)
 Follow the steps below to setup your environment for the workshop.
 
-## Setting up Git Integration in your workspace
+## [Setting up Git Integration in your workspace](#setting-up-git-integration-in-your-workspace)
 > ### STEP 1: Fork Github repo (optional)
 In your github repository, please fork the main repo, so that you could work with the forked repo when required. Here is how you could fork the repo in Github. 
 
@@ -72,7 +70,7 @@ Here is an example of results based on example settings previously.
 ![](/python_deploy/readme_images/workflow_output.png "")
 
 Once the workflow is created, you are ready to go to the generated workflow to run it and complete setup.
-## Navigating Databricks Workflow
+## [Navigating Databricks Workflow](#navigating-databricks-workflow)
 Click on the generated task link to guide you to the workflow details below. 
 
 Alternatively, from the Databricks homepage, navigate to the  persona menu in the top left, click on Workflows and you will see a list of the workflows that were created by yourself. Click on the specific workflow will navigate you to the workflow details page. 
@@ -95,10 +93,10 @@ If you selected classic compute during setup, you will see the job cluster specs
 
 ![](/python_deploy/readme_images/workflow_compute_pt_2.png "")
 
-## Run the Workflow
+## [Run the Workflow](#run-the-workflow)
 Once you have confirmed the settings, run the workflow to complete setup. The entire workflow will take ~1 hour to complete. The serving endpoint created at the end of the workflow will take some time to be available once the workflow completes.
 
-## Confirm SQL Warehouse
+## [Confirm SQL Warehouse](#confirm-sql-warehouse)
 Once the workflow has completed successfully, confirm that the Serverless SQL Warehouse was created. If it was not created, please use an appropriate existing SQL Warehouse or create a new one manually. The selected SQL Warehouse should be the one used during the workshop.
 
 > ### STEP 1: Confirm SQL Warehouse
@@ -120,7 +118,7 @@ If the SQL Warehouse was not created automatically during setup, manually create
 
 Please note, if you are required to use Pro instead of serverless, please **adjust the min cluster count to a higher number** to support seamless concurrency for users. Also, please adjust this and the max clusters accordingly based on the number of workshop participants. 
 
-## Confirm UC Objects
+## [Confirm UC Objects](#confirm-uc-objects)
 Once the workflow has completed successfully, confirm that the UC objects were all setup based on your catalog and schema widget inputs.
 
 > ### STEP 1: Confirm Catalog and Schemas
@@ -156,7 +154,7 @@ Go to **Serving** and search for _predict_claims_amount_ and confirm that the se
 
 ![](/python_deploy/readme_images/serving_endpoint.png "")
 
-## Create Genie Space
+## [Create Genie Space](#create-genie-space)
 At the time of writing, Genie Rooms are not able to be created programmatically, therefore you will need to create the Genie Space manually.
 
 > ### STEP 1: Create Genie Space
