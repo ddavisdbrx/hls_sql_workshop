@@ -172,6 +172,7 @@ This was the warehouse created by the workflow during setup. If it was not creat
 - fact_carrier_claims
 - fact_patient_claims
 - fact_prescription_drug_events
+
 **Sample Questions:**
 - What is the total number of claims submitted in a given year?
 - Who are the top 5 beneficiaries by claims submitted?
