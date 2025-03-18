@@ -1,13 +1,15 @@
 -- Databricks notebook source
 -- MAGIC %md
--- MAGIC ###beneficiary_summary
+-- MAGIC ###beneficiary
 
 -- COMMAND ----------
 
-CREATE STREAMING LIVE TABLE silver_beneficiary_summary
+CREATE STREAMING TABLE silver.beneficiary_insert
 AS
 SELECT
-     md5(bs.DESYNPUF_ID||current_timestamp||bs._metadata.file_name) as beneficiary_key
+     md5(bs.DESYNPUF_ID||current_timestamp||bs._metadata.file_name) as beneficiary_insert_key
+    ,md5(bs.DESYNPUF_ID||current_timestamp||bs._metadata.file_name) as beneficiary_key
+    ,md5(bs.DESYNPUF_ID) as beneficiary_unique_key
     ,bs.DESYNPUF_ID as beneficiary_code
     ,cast(substring(bs._metadata.file_name,7,4) as int) as year
     ,to_date(bs.BENE_BIRTH_DT,'yyyyMMdd') as date_of_birth
@@ -42,24 +44,41 @@ SELECT
     ,cast(MEDREIMB_CAR as double) as carrier_annual_medicare_reimbursement_amount
     ,cast(BENRES_CAR as double) as carrier_annual_beneficiary_responsiblity_amount
     ,cast(PPPYMT_CAR as double) as carrier_annual_primary_payer_reimbursement_amount
-    ,bs.load_timestamp as bronze_load_timestamp
-    ,current_timestamp as load_timestamp 
+    ,current_timestamp as insert_timestamp 
 FROM 
-stream(live.bronze_beneficiary_summary) bs
-left join live.bronze_lookup l_BENE_SEX_IDENT_CD on bs.BENE_SEX_IDENT_CD = l_BENE_SEX_IDENT_CD.code and l_BENE_SEX_IDENT_CD.variable = 'BENE_SEX_IDENT_CD'
-left join live.bronze_lookup l_BENE_RACE_CD on bs.BENE_RACE_CD = l_BENE_RACE_CD.code and l_BENE_RACE_CD.variable = 'BENE_RACE_CD'
-left join live.bronze_lookup l_SP_STATE_CODE on bs.SP_STATE_CODE = l_SP_STATE_CODE.code and l_SP_STATE_CODE.variable = 'SP_STATE_CODE'
-left join live.bronze_lookup l_SP_ALZHDMTA on bs.SP_ALZHDMTA = l_SP_ALZHDMTA.code and l_SP_ALZHDMTA.variable = 'SP_ALZHDMTA'
-left join live.bronze_lookup l_SP_CHF on bs.SP_CHF = l_SP_CHF.code and l_SP_CHF.variable = 'SP_CHF'
-left join live.bronze_lookup l_SP_CHRNKIDN on bs.SP_CHRNKIDN = l_SP_CHRNKIDN.code and l_SP_CHRNKIDN.variable = 'SP_CHRNKIDN'
-left join live.bronze_lookup l_SP_CNCR on bs.SP_CNCR = l_SP_CNCR.code and l_SP_CNCR.variable = 'SP_CNCR'
-left join live.bronze_lookup l_SP_COPD on bs.SP_COPD = l_SP_COPD.code and l_SP_COPD.variable = 'SP_COPD'
-left join live.bronze_lookup l_SP_DEPRESSN on bs.SP_DEPRESSN = l_SP_DEPRESSN.code and l_SP_DEPRESSN.variable = 'SP_DEPRESSN'
-left join live.bronze_lookup l_SP_DIABETES on bs.SP_DIABETES = l_SP_DIABETES.code and l_SP_DIABETES.variable = 'SP_DIABETES'
-left join live.bronze_lookup l_SP_ISCHMCHT on bs.SP_ISCHMCHT = l_SP_ISCHMCHT.code and l_SP_ISCHMCHT.variable = 'SP_ISCHMCHT'
-left join live.bronze_lookup l_SP_OSTEOPRS on bs.SP_OSTEOPRS = l_SP_OSTEOPRS.code and l_SP_OSTEOPRS.variable = 'SP_OSTEOPRS'
-left join live.bronze_lookup l_SP_RA_OA on bs.SP_RA_OA = l_SP_RA_OA.code and l_SP_RA_OA.variable = 'SP_RA_OA'
-left join live.bronze_lookup l_SP_STRKETIA on bs.SP_STRKETIA = l_SP_STRKETIA.code and l_SP_STRKETIA.variable = 'SP_STRKETIA'
+stream(bronze.beneficiary) bs
+left join bronze.lookups l_BENE_SEX_IDENT_CD on bs.BENE_SEX_IDENT_CD = l_BENE_SEX_IDENT_CD.code and l_BENE_SEX_IDENT_CD.variable = 'BENE_SEX_IDENT_CD'
+left join bronze.lookups l_BENE_RACE_CD on bs.BENE_RACE_CD = l_BENE_RACE_CD.code and l_BENE_RACE_CD.variable = 'BENE_RACE_CD'
+left join bronze.lookups l_SP_STATE_CODE on bs.SP_STATE_CODE = l_SP_STATE_CODE.code and l_SP_STATE_CODE.variable = 'SP_STATE_CODE'
+left join bronze.lookups l_SP_ALZHDMTA on bs.SP_ALZHDMTA = l_SP_ALZHDMTA.code and l_SP_ALZHDMTA.variable = 'SP_ALZHDMTA'
+left join bronze.lookups l_SP_CHF on bs.SP_CHF = l_SP_CHF.code and l_SP_CHF.variable = 'SP_CHF'
+left join bronze.lookups l_SP_CHRNKIDN on bs.SP_CHRNKIDN = l_SP_CHRNKIDN.code and l_SP_CHRNKIDN.variable = 'SP_CHRNKIDN'
+left join bronze.lookups l_SP_CNCR on bs.SP_CNCR = l_SP_CNCR.code and l_SP_CNCR.variable = 'SP_CNCR'
+left join bronze.lookups l_SP_COPD on bs.SP_COPD = l_SP_COPD.code and l_SP_COPD.variable = 'SP_COPD'
+left join bronze.lookups l_SP_DEPRESSN on bs.SP_DEPRESSN = l_SP_DEPRESSN.code and l_SP_DEPRESSN.variable = 'SP_DEPRESSN'
+left join bronze.lookups l_SP_DIABETES on bs.SP_DIABETES = l_SP_DIABETES.code and l_SP_DIABETES.variable = 'SP_DIABETES'
+left join bronze.lookups l_SP_ISCHMCHT on bs.SP_ISCHMCHT = l_SP_ISCHMCHT.code and l_SP_ISCHMCHT.variable = 'SP_ISCHMCHT'
+left join bronze.lookups l_SP_OSTEOPRS on bs.SP_OSTEOPRS = l_SP_OSTEOPRS.code and l_SP_OSTEOPRS.variable = 'SP_OSTEOPRS'
+left join bronze.lookups l_SP_RA_OA on bs.SP_RA_OA = l_SP_RA_OA.code and l_SP_RA_OA.variable = 'SP_RA_OA'
+left join bronze.lookups l_SP_STRKETIA on bs.SP_STRKETIA = l_SP_STRKETIA.code and l_SP_STRKETIA.variable = 'SP_STRKETIA'
+
+-- COMMAND ----------
+
+CREATE OR REFRESH STREAMING TABLE silver.beneficiary;
+
+APPLY CHANGES INTO
+  silver.beneficiary
+FROM
+  stream(silver.beneficiary_insert)
+KEYS
+  (beneficiary_unique_key)
+SEQUENCE BY
+  (year,insert_timestamp)
+COLUMNS * EXCEPT
+  (beneficiary_insert_key)
+STORED AS
+  SCD TYPE 1;
+
 
 -- COMMAND ----------
 
@@ -68,13 +87,15 @@ left join live.bronze_lookup l_SP_STRKETIA on bs.SP_STRKETIA = l_SP_STRKETIA.cod
 
 -- COMMAND ----------
 
-CREATE STREAMING LIVE TABLE silver_carrier_claims(
+CREATE STREAMING LIVE TABLE silver.carrier_claims_insert(
   CONSTRAINT `Beneficiary code is not null`    EXPECT (beneficiary_code is not null)
 )
 --PARTITIONED BY (file_name)
 AS
 SELECT
-   cc.DESYNPUF_ID as beneficiary_code
+   md5(cc.CLM_ID ||current_timestamp||cc._metadata.file_name) as carrier_claims_insert_key
+  ,md5(cc.CLM_ID) as carrier_claims_key
+  ,cc.DESYNPUF_ID as beneficiary_code
   ,cc.CLM_ID as claim_id
   ,to_date(CLM_FROM_DT,'yyyyMMdd') as claim_start_date
   ,to_date(CLM_THRU_DT,'yyyyMMdd') as claim_end_date
@@ -216,23 +237,52 @@ SELECT
   ,cast(cc.LINE_ICD9_DGNS_CD_11 as string) as line_icd9_diagnosis_code_11
   ,cast(cc.LINE_ICD9_DGNS_CD_12 as string) as line_icd9_diagnosis_code_12
   ,cast(cc.LINE_ICD9_DGNS_CD_13 as string) as line_icd9_diagnosis_code_13
-  ,cc.update_timestamp as bronze_update_timestamp
-  ,current_timestamp as load_timestamp
-  ,_metadata.file_name as file_name
-FROM stream(live.bronze_carrier_claims) cc
+  ,current_timestamp as insert_timestamp
+FROM stream(bronze.carrier_claims) cc
 
+-- COMMAND ----------
+
+CREATE OR REFRESH STREAMING TABLE silver.carrier_claims;
+
+APPLY CHANGES INTO
+  silver.carrier_claims
+FROM
+  stream(silver.carrier_claims_insert)
+KEYS
+  (carrier_claims_key)
+SEQUENCE BY
+  (insert_timestamp)
+COLUMNS * EXCEPT
+  (carrier_claims_insert_key)
+STORED AS
+  SCD TYPE 1;
 
 -- COMMAND ----------
 
 -- MAGIC %md
--- MAGIC ###Inpatient Claims
+-- MAGIC ###Patient Claims
+-- MAGIC
+-- MAGIC The patient claims fact table will source from two sources, inpatient claims and outpatient claims.
+-- MAGIC
+-- MAGIC In this scenario we are assuming that both of these sources is "insert only", meaning that there will be no updates or deletes to the source records. This allows for a streaming table to be created. As the data comes from two sources, we are able to use a [flow](https://learn.microsoft.com/en-us/azure/databricks/dlt/flows) to load from two seperate queries.
+-- MAGIC
+-- MAGIC If the sources could be modified, then it would be more approprate to create a materialized view instead of the table. This materialized fiew would have been a union query of the two sources. This is the most realistic "real world" example of how to do this. We are including this example do display how a flow will work.
 
 -- COMMAND ----------
 
-CREATE STREAMING LIVE TABLE silver_inpatient_claims
-AS
+CREATE OR REFRESH STREAMING TABLE silver.patient_claims_insert;
+
+-- COMMAND ----------
+
+CREATE FLOW 
+  outpatient_claims_insert
+AS INSERT INTO
+  silver.patient_claims_insert BY NAME
 SELECT
-   ic.DESYNPUF_ID as beneficiary_code
+   md5(ic.DESYNPUF_ID ||ic.CLM_ID ||ic.SEGMENT||current_timestamp||ic._metadata.file_name) as patient_claims_insert_key
+  ,md5(ic.DESYNPUF_ID ||ic.CLM_ID ||ic.SEGMENT) as patient_claims_key
+  ,ic.DESYNPUF_ID as beneficiary_code
+  ,'Outpatient' as claim_type
   ,ic.CLM_ID as claim_id
   ,cast(ic.SEGMENT as int) as claim_line_segment
   ,to_date(ic.CLM_FROM_DT,'yyyyMMdd') as claim_start_date
@@ -313,21 +363,20 @@ SELECT
   ,cast(ic.HCPCS_CD_43 as string) as hcfa_procedure_code_43
   ,cast(ic.HCPCS_CD_44 as string) as hcfa_procedure_code_44
   ,cast(ic.HCPCS_CD_45 as string) as hcfa_procedure_code_45
-  ,ic.update_timestamp as bronze_update_timestamp
-  ,current_timestamp as load_timestamp
-FROM stream(live.bronze_inpatient_claims) ic
+  ,current_timestamp as insert_timestamp
+FROM stream(bronze.inpatient_claims) ic;
 
 -- COMMAND ----------
 
--- MAGIC %md
--- MAGIC ###Outpatient Claims
-
--- COMMAND ----------
-
-CREATE STREAMING LIVE TABLE silver_outpatient_claims
-AS
+CREATE FLOW 
+  inpatient_claims
+AS INSERT INTO
+  silver.patient_claims_insert BY NAME
 SELECT
-   oc.DESYNPUF_ID as beneficiary_code
+   md5(oc.DESYNPUF_ID ||oc.CLM_ID ||oc.SEGMENT||current_timestamp||oc._metadata.file_name) as patient_claims_insert_key
+  ,md5(oc.DESYNPUF_ID ||oc.CLM_ID ||oc.SEGMENT) as patient_claims_key
+  ,oc.DESYNPUF_ID as beneficiary_code
+  ,'Inpatient' as claim_type
   ,oc.CLM_ID as claim_id
   ,cast(oc.SEGMENT as int) as claim_line_segment
   ,to_date(oc.CLM_FROM_DT,'yyyyMMdd') as claim_start_date
@@ -403,10 +452,26 @@ SELECT
   ,cast(oc.HCPCS_CD_43 as string) as hcfa_procedure_code_43
   ,cast(oc.HCPCS_CD_44 as string) as hcfa_procedure_code_44
   ,cast(oc.HCPCS_CD_45 as string) as hcfa_procedure_code_45
-  ,oc.update_timestamp as bronze_update_timestamp
-  ,current_timestamp as load_timestamp
-FROM stream(live.bronze_outpatient_claims) oc
+  ,current_timestamp as insert_timestamp
+FROM stream(bronze.outpatient_claims) oc
 
+
+-- COMMAND ----------
+
+CREATE OR REFRESH STREAMING TABLE silver.patient_claims;
+
+APPLY CHANGES INTO
+  silver.patient_claims
+FROM
+  stream(silver.patient_claims_insert)
+KEYS
+  (patient_claims_key)
+SEQUENCE BY
+  (insert_timestamp)
+COLUMNS * EXCEPT
+  (patient_claims_insert_key)
+STORED AS
+  SCD TYPE 1;
 
 -- COMMAND ----------
 
@@ -415,10 +480,12 @@ FROM stream(live.bronze_outpatient_claims) oc
 
 -- COMMAND ----------
 
-CREATE STREAMING LIVE TABLE silver_prescription_drug_events
+CREATE STREAMING LIVE TABLE silver.prescription_drug_events_insert
 AS
 SELECT
-   pde.DESYNPUF_ID as beneficiary_code
+    md5(pde.DESYNPUF_ID ||pde.SRVC_DT ||pde.PROD_SRVC_ID ||current_timestamp||pde._metadata.file_name) as prescription_drug_events_insert_key
+   ,md5(pde.DESYNPUF_ID ||pde.SRVC_DT ||pde.PROD_SRVC_ID) as prescription_drug_events_key
+  ,pde.DESYNPUF_ID as beneficiary_code
   ,cast(pde.PDE_ID as string) as ccw_part_d_event_number
   ,to_date(pde.SRVC_DT,'yyyyMMdd') as rx_service_date
   ,cast(pde.PROD_SRVC_ID as string) as product_service_id
@@ -426,9 +493,25 @@ SELECT
   ,cast(pde.DAYS_SUPLY_NUM as int) as days_supply
   ,cast(pde.PTNT_PAY_AMT as double) as patient_pay_amount
   ,cast(pde.TOT_RX_CST_AMT as double) as gross_drug_cost
-  ,pde.update_timestamp as bronze_update_timestamp
-  ,current_timestamp as load_timestamp
-FROM stream(live.bronze_prescription_drug_events) pde
+  ,current_timestamp as insert_timestamp
+FROM stream(bronze.prescription_drug_events) pde
+
+-- COMMAND ----------
+
+CREATE OR REFRESH STREAMING TABLE silver.prescription_drug_events;
+
+APPLY CHANGES INTO
+  silver.prescription_drug_events
+FROM
+  stream(silver.prescription_drug_events_insert)
+KEYS
+  (prescription_drug_events_key)
+SEQUENCE BY
+  (insert_timestamp)
+COLUMNS * EXCEPT
+  (prescription_drug_events_insert_key)
+STORED AS
+  SCD TYPE 1;
 
 -- COMMAND ----------
 
@@ -437,10 +520,11 @@ FROM stream(live.bronze_prescription_drug_events) pde
 
 -- COMMAND ----------
 
-CREATE STREAMING LIVE TABLE silver_npi_codes
+CREATE STREAMING LIVE TABLE silver.npi_codes_insert
 AS
 SELECT
-   md5(n.npi) as provider_key
+    md5(n.npi||current_timestamp||n._metadata.file_name) as npi_codes_insert_key
+   ,md5(n.npi) as npi_codes_key
   ,cast(n.npi as string) as npi_code
   ,l_entity_type_code.label as entity_type
   ,Replacement_NPI as replacement_npi
@@ -501,11 +585,28 @@ SELECT
   ,Provider_License_Number_State_Code_3 as provider_license_number_state_code_3
   ,Healthcare_Provider_Primary_Taxonomy_Switch_3 as healthcare_provider_primary_taxonomy_switch_3
   ,to_date(Certification_Date,'MM/dd/yyyy') as certification_date
-  ,n.update_timestamp as bronze_update_timestamp
-  ,current_timestamp as load_timestamp
-FROM stream(live.bronze_npi_code) n
-left join live.bronze_lookup l_entity_type_code on n.entity_type_code = l_entity_type_code.code and l_entity_type_code.variable = 'entity_type_code'
-left join live.bronze_lookup l_gender_code on n.Provider_Gender_Code = l_gender_code.code and l_gender_code.variable = 'gender_code'
+  ,current_timestamp as insert_timestamp
+FROM stream(bronze.npi_codes) n
+left join bronze.lookups l_entity_type_code on n.entity_type_code = l_entity_type_code.code and l_entity_type_code.variable = 'entity_type_code'
+left join bronze.lookups l_gender_code on n.Provider_Gender_Code = l_gender_code.code and l_gender_code.variable = 'gender_code'
+
+
+-- COMMAND ----------
+
+CREATE OR REFRESH STREAMING TABLE silver.npi_codes;
+
+APPLY CHANGES INTO
+  silver.npi_codes
+FROM
+  stream(silver.npi_codes_insert)
+KEYS
+  (npi_codes_key)
+SEQUENCE BY
+  (insert_timestamp)
+COLUMNS * EXCEPT
+  (npi_codes_insert_key)
+STORED AS
+  SCD TYPE 1;
 
 -- COMMAND ----------
 
@@ -514,15 +615,34 @@ left join live.bronze_lookup l_gender_code on n.Provider_Gender_Code = l_gender_
 
 -- COMMAND ----------
 
-CREATE STREAMING LIVE TABLE silver_icd_codes(
-  CONSTRAINT `Diagnosis code is not null`    EXPECT (diagnosis_code is not null) ON VIOLATION DROP ROW
-)
+CREATE STREAMING TABLE silver.icd_codes_insert
+  (
+    CONSTRAINT `Diagnosis code is not null`    EXPECT (diagnosis_code is not null) ON VIOLATION DROP ROW
+  )
 AS
 SELECT
-   md5(DiagnosisCode) as diagnosis_key
+   md5(DiagnosisCode||current_timestamp||i._metadata.file_name) as icd_codes_insert_key
+  ,md5(DiagnosisCode) as icd_codes_key
   ,DiagnosisCode as diagnosis_code
   ,LongDescription as diagnosis_long_description
   ,ShortDescription as diagnosis_short_description
-  ,i.update_timestamp as bronze_load_timestamp
-  ,current_timestamp as load_timestamp
-FROM stream(live.bronze_icd_codes) i
+  ,current_timestamp as insert_timestamp
+FROM stream(bronze.icd_codes) i
+
+
+-- COMMAND ----------
+
+CREATE OR REFRESH STREAMING TABLE silver.icd_codes;
+
+APPLY CHANGES INTO
+  silver.icd_codes
+FROM
+  stream(silver.icd_codes_insert)
+KEYS
+  (icd_codes_key)
+SEQUENCE BY
+  (insert_timestamp)
+COLUMNS * EXCEPT
+  (icd_codes_insert_key)
+STORED AS
+  SCD TYPE 1;
