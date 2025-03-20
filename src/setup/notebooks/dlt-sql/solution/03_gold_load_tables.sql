@@ -4,12 +4,21 @@
 
 -- COMMAND ----------
 
+CREATE STREAMING LIVE VIEW vw_dim_beneficiary
+AS
+select 
+   uuid() as beneficiary_key
+  ,* 
+from stream(silver.beneficiary_insert)
+
+-- COMMAND ----------
+
 CREATE OR REFRESH STREAMING TABLE gold.dim_beneficiary;
 
 APPLY CHANGES INTO
   gold.dim_beneficiary
 FROM
-  stream(silver.beneficiary_insert)
+  stream(vw_dim_beneficiary)
 KEYS
   (beneficiary_code)
 SEQUENCE BY

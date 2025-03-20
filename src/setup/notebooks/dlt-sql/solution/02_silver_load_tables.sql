@@ -7,8 +7,8 @@
 CREATE STREAMING TABLE silver.beneficiary_insert
 AS
 SELECT
-     md5(bs.DESYNPUF_ID||current_timestamp||bs._metadata.file_name) as beneficiary_insert_key
-    ,md5(bs.DESYNPUF_ID||current_timestamp||bs._metadata.file_name) as beneficiary_key
+     uuid() as beneficiary_insert_key
+    --,uuid() as beneficiary_key
     ,md5(bs.DESYNPUF_ID) as beneficiary_unique_key
     ,bs.DESYNPUF_ID as beneficiary_code
     ,cast(substring(bs._metadata.file_name,7,4) as int) as year
@@ -93,7 +93,7 @@ CREATE STREAMING LIVE TABLE silver.carrier_claims_insert(
 --PARTITIONED BY (file_name)
 AS
 SELECT
-   md5(cc.CLM_ID ||current_timestamp||cc._metadata.file_name) as carrier_claims_insert_key
+   uuid() as carrier_claims_insert_key
   ,md5(cc.CLM_ID) as carrier_claims_key
   ,cc.DESYNPUF_ID as beneficiary_code
   ,cc.CLM_ID as claim_id
@@ -279,7 +279,7 @@ CREATE FLOW
 AS INSERT INTO
   silver.patient_claims_insert BY NAME
 SELECT
-   md5(ic.DESYNPUF_ID ||ic.CLM_ID ||ic.SEGMENT||current_timestamp||ic._metadata.file_name) as patient_claims_insert_key
+   uuid() as patient_claims_insert_key
   ,md5(ic.DESYNPUF_ID ||ic.CLM_ID ||ic.SEGMENT) as patient_claims_key
   ,ic.DESYNPUF_ID as beneficiary_code
   ,'Outpatient' as claim_type
@@ -373,7 +373,7 @@ CREATE FLOW
 AS INSERT INTO
   silver.patient_claims_insert BY NAME
 SELECT
-   md5(oc.DESYNPUF_ID ||oc.CLM_ID ||oc.SEGMENT||current_timestamp||oc._metadata.file_name) as patient_claims_insert_key
+   uuid() as patient_claims_insert_key
   ,md5(oc.DESYNPUF_ID ||oc.CLM_ID ||oc.SEGMENT) as patient_claims_key
   ,oc.DESYNPUF_ID as beneficiary_code
   ,'Inpatient' as claim_type
@@ -483,7 +483,7 @@ STORED AS
 CREATE STREAMING LIVE TABLE silver.prescription_drug_events_insert
 AS
 SELECT
-    md5(pde.DESYNPUF_ID ||pde.SRVC_DT ||pde.PROD_SRVC_ID ||current_timestamp||pde._metadata.file_name) as prescription_drug_events_insert_key
+    uuid() as prescription_drug_events_insert_key
    ,md5(pde.DESYNPUF_ID ||pde.SRVC_DT ||pde.PROD_SRVC_ID) as prescription_drug_events_key
   ,pde.DESYNPUF_ID as beneficiary_code
   ,cast(pde.PDE_ID as string) as ccw_part_d_event_number
@@ -523,7 +523,7 @@ STORED AS
 CREATE STREAMING LIVE TABLE silver.npi_codes_insert
 AS
 SELECT
-    md5(n.npi||current_timestamp||n._metadata.file_name) as npi_codes_insert_key
+    uuid() as npi_codes_insert_key
    ,md5(n.npi) as npi_codes_key
   ,cast(n.npi as string) as npi_code
   ,l_entity_type_code.label as entity_type
@@ -621,7 +621,7 @@ CREATE STREAMING TABLE silver.icd_codes_insert
   )
 AS
 SELECT
-   md5(DiagnosisCode||current_timestamp||i._metadata.file_name) as icd_codes_insert_key
+   uuid() as icd_codes_insert_key
   ,md5(DiagnosisCode) as icd_codes_key
   ,DiagnosisCode as diagnosis_code
   ,LongDescription as diagnosis_long_description

@@ -6,7 +6,12 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/beneficiary/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/beneficiary/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
+
 
 -- COMMAND ----------
 
@@ -17,7 +22,11 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/carrier_claims/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/carrier_claims/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
 -- COMMAND ----------
 
@@ -28,7 +37,11 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/inpatient_claims/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/inpatient_claims/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
 -- COMMAND ----------
 
@@ -39,7 +52,11 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/outpatient_claims/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/outpatient_claims/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
 -- COMMAND ----------
 
@@ -50,7 +67,11 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/prescription_drug_events/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/prescription_drug_events/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
 -- COMMAND ----------
 
@@ -61,7 +82,11 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/icd_codes/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/icd_codes/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
 -- COMMAND ----------
 
@@ -72,7 +97,11 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/npi_codes/", 'csv')
+FROM STREAM read_files(
+  "${volume_path}/npi_codes/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
 
 -- COMMAND ----------
@@ -84,9 +113,9 @@ SELECT
   * 
   ,current_timestamp as insert_timestamp
   ,_metadata
-FROM cloud_files("${volume_path}/lookups/", 'csv')
-
-
--- COMMAND ----------
-
+FROM STREAM read_files(
+  "${volume_path}/lookups/*",
+  format => 'csv',
+  inferColumnTypes => false
+)
 
