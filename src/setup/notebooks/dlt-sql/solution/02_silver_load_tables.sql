@@ -1,6 +1,23 @@
 -- Databricks notebook source
 -- MAGIC %md
+-- MAGIC #Silver Load Notebook
+-- MAGIC
+-- MAGIC This notebook will build the silver layer. This will consist of a table that transforms data and inserts the data into a silver table. This data is then merged into another silver table that will show the deduplicated version of the data that shows the most recient copy of the data.
+
+-- COMMAND ----------
+
+-- MAGIC %md
 -- MAGIC ###beneficiary
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC The code block below will build the silver table with data transformations necessary for the dataset. This will insert into the first silver table.
+-- MAGIC
+-- MAGIC **Key Concepts in the table:**
+-- MAGIC - Data is read form the source table with the **stream()** syntax to bring in only the latest copy of the source table since the last load
+-- MAGIC - This will join multiple times to the table bronze.lookups. This table contains descriptions for various fields to transform a code into something that an analyst would undertand.
+-- MAGIC - Data is typed using case statements to move the data to the desiered format as the bronze tables store everything as strings
 
 -- COMMAND ----------
 
@@ -64,6 +81,18 @@ left join bronze.lookups l_SP_STRKETIA on bs.SP_STRKETIA = l_SP_STRKETIA.code an
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC The table is then merged into the deduplicate version of the table using the [Apply Changes](https://docs.databricks.com/aws/en/dlt/cdc) syntax. This will perform a merge based on the key(s) provided. It has the following components.
+-- MAGIC
+-- MAGIC - FROM: This is the source table, which will be streamed into this statement.
+-- MAGIC - KEYS: This is a list of keys that are used to identify a unique record so it knows if the record exists to determine if it should be inserted or updated
+-- MAGIC - SEQUENCE BY: This will allow the system to determine what is the most recent record. In this case, we are using year, but if there are multiple records for the same year, it will use insert_timestamp next.
+-- MAGIC - COLUMNS * EXCEPT: This will insert all columns from the source except the ones listed
+-- MAGIC - STORED AS: This will determine if we are using SCD Type 1 (merge to the latest reocrd) or SCD Type 2 (tracks changes in the table). In this scenario, we are using type 1.
+-- MAGIC
+
+-- COMMAND ----------
+
 CREATE OR REFRESH STREAMING TABLE silver.beneficiary;
 
 APPLY CHANGES INTO
@@ -87,10 +116,14 @@ STORED AS
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC This table follows the same process as the previs table. One key differences is the use of a CONSTRAINT as we want to impliment a data quality rule to make sure that the beneficiary code is not null. As we didn't include additional logic to to drop the row or stop the pipeline, so this will just set a warning if this contraint is not met.
+
+-- COMMAND ----------
+
 CREATE STREAMING LIVE TABLE silver.carrier_claims_insert(
   CONSTRAINT `Beneficiary code is not null`    EXPECT (beneficiary_code is not null)
 )
---PARTITIONED BY (file_name)
 AS
 SELECT
    uuid() as carrier_claims_insert_key
@@ -275,14 +308,14 @@ CREATE OR REFRESH STREAMING TABLE silver.patient_claims_insert;
 -- COMMAND ----------
 
 CREATE FLOW 
-  outpatient_claims_insert
+  inpatient_claims_insert
 AS INSERT INTO
   silver.patient_claims_insert BY NAME
 SELECT
    uuid() as patient_claims_insert_key
   ,md5(ic.DESYNPUF_ID ||ic.CLM_ID ||ic.SEGMENT) as patient_claims_key
   ,ic.DESYNPUF_ID as beneficiary_code
-  ,'Outpatient' as claim_type
+  ,'Inpatient' as claim_type
   ,ic.CLM_ID as claim_id
   ,cast(ic.SEGMENT as int) as claim_line_segment
   ,to_date(ic.CLM_FROM_DT,'yyyyMMdd') as claim_start_date
@@ -369,14 +402,14 @@ FROM stream(bronze.inpatient_claims) ic;
 -- COMMAND ----------
 
 CREATE FLOW 
-  inpatient_claims
+  outpatient_claims
 AS INSERT INTO
   silver.patient_claims_insert BY NAME
 SELECT
    uuid() as patient_claims_insert_key
   ,md5(oc.DESYNPUF_ID ||oc.CLM_ID ||oc.SEGMENT) as patient_claims_key
   ,oc.DESYNPUF_ID as beneficiary_code
-  ,'Inpatient' as claim_type
+  ,'Outpatient' as claim_type
   ,oc.CLM_ID as claim_id
   ,cast(oc.SEGMENT as int) as claim_line_segment
   ,to_date(oc.CLM_FROM_DT,'yyyyMMdd') as claim_start_date

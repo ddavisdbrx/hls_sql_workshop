@@ -4,12 +4,24 @@
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC We want dim_beneficiary to be loaded as a SCD Type 2 dimension, but we need to fist modify this data by adding a surrogate key for beneificiary (defined as an uuid or guid). As you can't edit fields on an APPLY CHANGES transformation, we will first define the transformation in a view
+-- MAGIC
+-- MAGIC A [View in DLT](https://docs.databricks.com/aws/en/dlt-ref/dlt-sql-ref-create-view) will temporarily create a view during the execution of the DLT pipeline. This is great for datsets that you need to calculate but don't want to store the data.
+
+-- COMMAND ----------
+
 CREATE STREAMING LIVE VIEW vw_dim_beneficiary
 AS
 select 
    uuid() as beneficiary_key
   ,* 
 from stream(silver.beneficiary_insert)
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC Once the transformation is in place in the view, we will load the SCD Type 2 table using the same method that we used to merge data in silver, ([apply changes](https://docs.databricks.com/aws/en/dlt/cdc)). The primary exception is that we want to track history as an SCD2.
 
 -- COMMAND ----------
 
@@ -34,6 +46,13 @@ TRACK HISTORY ON * EXCEPT
 
 -- MAGIC %md
 -- MAGIC ###dim_icd_code
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC In these tables, we will be building Type 1 SCDs. As we used an SCD1 to dedupe the data in silver, we can pull directly from that table.
+-- MAGIC
+-- MAGIC Alternatively, we could do a very similar transformation to how we build the silver table.
 
 -- COMMAND ----------
 
@@ -114,6 +133,13 @@ where year in (2008,2009,2010)
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC We will build the Fact Tables as [materilized views](https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/sql-ref-syntax-ddl-create-materialized-view).
+-- MAGIC
+-- MAGIC We are using these instead of streaming tables as it's possible that data may be updated or deleted and we want to refelect that easily in the fact tables. We will be relying on Enzyme to find the most performative way to update these tables.
+
+-- COMMAND ----------
+
 CREATE OR REFRESH MATERIALIZED VIEW  gold.fact_prescription_drug_events
 AS
 SELECT
@@ -177,8 +203,12 @@ LEFT JOIN gold.dim_beneficiary db on c.beneficiary_code = db.beneficiary_code
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC We are unpivoting the carrier claims from many columns to many rows. This fact table will use the [UNPIVOT](https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-qry-select-unpivot) SQL clause.
+
+-- COMMAND ----------
+
 CREATE OR REFRESH MATERIALIZED VIEW  gold.fact_carrier_claims
---TBLPROPERTIES ("pipelines.autoOptimize.zOrderCols"="claim_start_date,beneficiary_key")
 CLUSTER BY (beneficiary_key,claim_start_date)
 AS
 SELECT
@@ -255,19 +285,3 @@ from gold.fact_patient_claims c
 join gold.dim_beneficiary b on c.beneficiary_key = b.beneficiary_key
 join gold.dim_provider p on c.attending_physician_provider_key = p.provider_key
 
-
--- COMMAND ----------
-
-/*
-CREATE LIVE TABLE gold.my_fk_test
-  (
-     beneficiary_key STRING
-    ,gross_drug_cost DOUBLE
-    ,CONSTRAINT myfktest_beneficiary_fk FOREIGN KEY (beneficiary_key) REFERENCES gold.dim_beneficiary
-  )
-AS
-SELECT
-   beneficiary_key
-  ,gross_drug_cost
-FROM gold.fact_prescription_drug_events
-*/
