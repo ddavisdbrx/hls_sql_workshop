@@ -7,6 +7,9 @@ dbutils.widgets.text('schema', 'cms')
 catalog = dbutils.widgets.get('catalog')
 schema = dbutils.widgets.get('schema')
 
+print(f'{catalog}')
+print(f'{schema}')
+
 # specify catalog to use
 spark.sql(f'USE CATALOG {catalog}')
 spark.sql(f'USE SCHEMA {schema}')
@@ -234,3 +237,101 @@ spark.sql(f'USE SCHEMA {schema}')
 # MAGIC ALTER TABLE gold.dim_diagnosis ALTER COLUMN diagnosis_code COMMENT 'A short, alphanumeric code used to represent the diagnosis in a standardized manner.';
 # MAGIC ALTER TABLE gold.dim_diagnosis ALTER COLUMN diagnosis_long_description COMMENT 'A detailed description of the diagnosis, providing context and additional information.';
 # MAGIC ALTER TABLE gold.dim_diagnosis ALTER COLUMN diagnosis_short_description COMMENT 'A concise summary of the diagnosis, allowing quick and easy understanding of the condition.';
+
+# COMMAND ----------
+
+# DBTITLE 1,create metric view
+# MAGIC %sql
+# MAGIC CREATE VIEW `hls_sql_workshop`.`gold`.`claims_metric_view`
+# MAGIC (
+# MAGIC   `Claim ID` COMMENT "Unique identifier for each claim",
+# MAGIC   `Claim Date` COMMENT "Date of the claim",
+# MAGIC   `Claim Month` COMMENT "Month of the claim date",
+# MAGIC   `Claim Year` COMMENT "Year of the claim date",
+# MAGIC   `Beneficiary ID` COMMENT "Unique identifier for the beneficiary",
+# MAGIC   `Beneficiary Gender` COMMENT "Gender of the beneficiary",
+# MAGIC   `Diagnosis Code` COMMENT "Primary diagnosis code for the claim",
+# MAGIC   `Diagnosis Description` COMMENT "Description of the diagnosis code",
+# MAGIC   `Provider ID` COMMENT "Unique identifier for the provider",
+# MAGIC   `Provider Entity Type` COMMENT "Provider's entity type",
+# MAGIC   `Total Claim Amount` COMMENT "Sum of claim amounts",
+# MAGIC   `Average Claim Amount` COMMENT "Average claim amount per claim",
+# MAGIC   `Distinct Beneficiaries` COMMENT "Number of unique beneficiaries",
+# MAGIC   `Claims Count` COMMENT "Total number of claims",
+# MAGIC   `Trailing 30 Day Claim Amount` COMMENT "Sum of claim amounts in trailing 30 days"
+# MAGIC )
+# MAGIC WITH METRICS
+# MAGIC LANGUAGE YAML
+# MAGIC AS $$
+# MAGIC version: 0.1
+# MAGIC
+# MAGIC source: hls_sql_workshop.gold.fact_patient_claims
+# MAGIC
+# MAGIC joins:
+# MAGIC   - name: date
+# MAGIC     source: hls_sql_workshop.gold.dim_date
+# MAGIC     on: claim_start_date = date.date
+# MAGIC
+# MAGIC   - name: beneficiary
+# MAGIC     source: hls_sql_workshop.gold.dim_beneficiary
+# MAGIC     on: source.beneficiary_key = beneficiary.beneficiary_key
+# MAGIC
+# MAGIC   - name: diagnosis
+# MAGIC     source: hls_sql_workshop.gold.dim_diagnosis
+# MAGIC     on: source.diagnosis_key_1 = diagnosis.diagnosis_key
+# MAGIC
+# MAGIC   - name: provider
+# MAGIC     source: hls_sql_workshop.gold.dim_provider
+# MAGIC     on: source.attending_physician_provider_key = provider.provider_key
+# MAGIC
+# MAGIC dimensions:
+# MAGIC   - name: Claim ID
+# MAGIC     expr: claim_id
+# MAGIC
+# MAGIC   - name: Claim Date
+# MAGIC     expr: claim_start_date
+# MAGIC
+# MAGIC   - name: Claim Month
+# MAGIC     expr: date_trunc('month', claim_start_date)
+# MAGIC
+# MAGIC   - name: Claim Year
+# MAGIC     expr: date_trunc('year', claim_start_date)
+# MAGIC
+# MAGIC   - name: Beneficiary ID
+# MAGIC     expr: beneficiary_key
+# MAGIC
+# MAGIC   - name: Beneficiary Gender
+# MAGIC     expr: beneficiary.gender
+# MAGIC
+# MAGIC   - name: Diagnosis Code
+# MAGIC     expr: diagnosis.diagnosis_code
+# MAGIC
+# MAGIC   - name: Diagnosis Description
+# MAGIC     expr: diagnosis.diagnosis_short_description
+# MAGIC
+# MAGIC   - name: Provider ID
+# MAGIC     expr: provider.provider_key
+# MAGIC
+# MAGIC   - name: Provider Entity Type
+# MAGIC     expr: provider.entity_type
+# MAGIC
+# MAGIC measures:
+# MAGIC   - name: Total Claim Amount
+# MAGIC     expr: SUM(claim_payment_amount)
+# MAGIC
+# MAGIC   - name: Average Claim Amount
+# MAGIC     expr: AVG(claim_payment_amount)
+# MAGIC
+# MAGIC   - name: Distinct Beneficiaries
+# MAGIC     expr: COUNT(DISTINCT beneficiary_key)
+# MAGIC
+# MAGIC   - name: Claims Count
+# MAGIC     expr: COUNT(claim_id)
+# MAGIC
+# MAGIC   - name: Trailing 30 Day Claim Amount
+# MAGIC     expr: SUM(claim_payment_amount)
+# MAGIC     window:
+# MAGIC       - order: Claim Date
+# MAGIC         range: trailing 30 day
+# MAGIC         semiadditive: last
+# MAGIC $$
