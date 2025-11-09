@@ -60,7 +60,7 @@ catalog = dbutils.widgets.get("catalog")
 schema = dbutils.widgets.get("schema")
 volume = dbutils.widgets.get("volume")
 compute_type = dbutils.widgets.get("compute_type")
-sas_token = dbutils.widgets.get("sas_token")
+sas_token = dbutils.widgets.get("sas_token").strip()
 
 # COMMAND ----------
 
@@ -111,6 +111,23 @@ def print_config(dict):
       print(f" {key}: {value}")
 
 print_config(config)      
+
+# COMMAND ----------
+
+# DBTITLE 1,Create catalog and schema
+# the catalog and schema must be created before the DLT pipeline is generated
+
+# print values
+print(f"""
+  catalog = {catalog}
+  schema = {schema}
+""")
+
+# create catalog
+spark.sql(f'CREATE CATALOG IF NOT EXISTS {catalog};')
+
+# create schema
+spark.sql(f'CREATE SCHEMA IF NOT EXISTS {catalog}.{schema};')
 
 # COMMAND ----------
 
