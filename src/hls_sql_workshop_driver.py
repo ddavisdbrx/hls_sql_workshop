@@ -121,13 +121,29 @@ print_config(config)
 print(f"""
   catalog = {catalog}
   schema = {schema}
+  volume = {volume}
 """)
 
 # create catalog
-spark.sql(f'CREATE CATALOG IF NOT EXISTS {catalog};')
+try:
+  spark.sql(f'CREATE CATALOG IF NOT EXISTS {catalog};')
+  print('Successfully created catalog')
+except Exception as e:
+  print(f'ERROR: Error creating catalog: {e}')
 
 # create schema
-spark.sql(f'CREATE SCHEMA IF NOT EXISTS {catalog}.{schema};')
+try:
+  spark.sql(f'CREATE SCHEMA IF NOT EXISTS {catalog}.{schema};')
+  print('Successfully created schema')
+except Exception as e:
+  print(f'ERROR: Error creating schema: {e}')
+
+# create volume
+try:
+  spark.sql(f'CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume};')
+  print('Successfully created volume')
+except Exception as e:
+  print(f'ERROR: Error creating volume: {e}')
 
 # COMMAND ----------
 
