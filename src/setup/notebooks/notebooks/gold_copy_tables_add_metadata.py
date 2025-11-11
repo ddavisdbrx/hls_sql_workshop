@@ -16,6 +16,16 @@ spark.sql(f'USE SCHEMA {schema}')
 
 # COMMAND ----------
 
+# DBTITLE 1,show current catalog
+# MAGIC %sql select current_catalog()
+
+# COMMAND ----------
+
+# DBTITLE 1,show current schema
+# MAGIC %sql select current_database()
+
+# COMMAND ----------
+
 # MAGIC %sql
 # MAGIC CREATE OR REPLACE TABLE gold.dim_date AS 
 # MAGIC SELECT * 
@@ -242,7 +252,7 @@ spark.sql(f'USE SCHEMA {schema}')
 
 # DBTITLE 1,create metric view
 # MAGIC %sql
-# MAGIC CREATE VIEW `hls_sql_workshop`.`gold`.`claims_metric_view`
+# MAGIC CREATE OR REPLACE VIEW gold.claims_metric_view
 # MAGIC (
 # MAGIC   `Claim ID` COMMENT "Unique identifier for each claim",
 # MAGIC   `Claim Date` COMMENT "Date of the claim",
