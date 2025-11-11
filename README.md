@@ -178,10 +178,11 @@ At the time of writing, Genie Rooms are not able to be created programmatically,
 > ### STEP 1: Create Genie Space
 
 Go to **Genie -> New** and create the Genie Space using the setting below: 
-Title: CMS Genie Space
-- **Description:**
+- **Title:** CMS Genie Space
+- **Description:** This data originates from the Centers for Medicare & Medicaid Services (CMS) 2008-2010 Data Entrepreneurs’ Synthetic Public Use File (DE-SynPUF). The DE-SynPUF was designed to offer a realistic representation of claims data in the public domain while ensuring the utmost protection of Medicare beneficiaries’ protected health information. The tables in this dataset present a denormalized view of Medicare claims data, including details on beneficiaries, carrier claims, patient claims, prescription drug events (e.g., filled prescriptions), providers, and diagnosis-related information.
 - **Default Warehouse:** SQL_Warehouse_Serverless_Warehouse 
 This was the warehouse created by the workflow during setup. If it was not created during setup, please select the name of the warehouse you created manually in previous steps.
+  - This was the warehouse created by the workflow during setup. If it was not created during setup, please select the name of the warehouse you created manually in previous steps.
 - **Tables:** Select all tables from the gold schema
   - dim_beneficiary
   - dim_date
@@ -190,6 +191,28 @@ This was the warehouse created by the workflow during setup. If it was not creat
   - fact_carrier_claims
   - fact_patient_claims
   - fact_prescription_drug_events
+
+**General Instructions** (Add general instructions on how you want Genie to behave):
+```
+* When asked about information that is local, for example a local provider, local should be considered New York, or NY.
+* Refer to all states as the state abbreviation,. For example, New York is NY.
+* A beneficiary refers to the individual entitled to receiving health benefits. In medicare, this is the individual eligible to receive benefits. In private health insurance, this is the person who holds the insurance policy
+* For all columns that end with '_flag', interpret 1 as True, or "Yes", and 0 as False, or "No"
+* When asked for diagnosis, return the diagnosis_short_description
+* rx_service_date refers to the date a prescription was filled
+* if date_of_death is null, then that person is not deceased
+* ESRD stands for End-Stage Renal Disease. It refers to the final, most severe stage of chronic kidney disease (CKD)
+* part_a_coverage refers to "Hospital Insurance" which primarily covers inpatient care in hospitals, including critical access hospitals, skilled nursing facilities (not custodial care), hospice care, and some home health care services; essentially covering the costs of staying in a hospital as an inpatient
+* part_b_coverage refers to coverage for medical services like doctors' services, outpatient care, and other medical services that Part A doesn't cover.
+* hmo_coverage refers to "Health Maintenance Organization" coverage, which is a type of health insurance plan that limits coverage to a specific network of doctors, hospitals, and other healthcare providers, usually requiring you to choose a primary care physician (PCP) to manage your care and get referrals for specialist visits, and generally does not cover out-of-network care except in emergencies
+* part_d_coverage refers to Medicare prescription drug coverage, is a voluntary program that helps pay for prescription drugs. It's available to everyone with Medicare, regardless of income, health, or prescription costs
+* COPD refers to  Chronic Obstructive Pulmonary Disease, which is a group of progressive lung diseases that cause breathing difficulties.
+* ischemic heart disease is also referred to as IHD, or coronary heart disease.
+* When asked for information that includes data from dim_beneficiary, specify __END_AT = NULL unless the user specifies that they would like to see changes to beneficiaries over time
+* When asked for claim amounts, default to claim_payment_amount unless explicitly asked for another type of claim amount
+* When asked for claim dates, default to using claim_start_date unless explicitly asked for another type of claim date
+
+```
 
 **Sample Questions:**
 - What is the total number of claims submitted in a given year?

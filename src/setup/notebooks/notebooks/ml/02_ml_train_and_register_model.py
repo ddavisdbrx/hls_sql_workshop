@@ -109,7 +109,7 @@ categorical_imputer = SimpleImputer(strategy="most_frequent")
 # Pipeline for preprocessing
 categorical_transformer = Pipeline(steps=[
     ("imputer", categorical_imputer),
-    ("encoder", OneHotEncoder(handle_unknown="ignore", sparse=False))
+    ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
 ])
 
 boolean_transformer = Pipeline(steps=[
