@@ -219,6 +219,10 @@ create_sql_warehouse = Task(
 
 # DBTITLE 1,Result Conditional Task
 # task 2: copy_files_to_volume
+if compute_type == "classic":
+  volume_job_cluster_key = job_cluster_key
+
+# copy_files_to_volume
 copy_files_to_volume = Task(
   task_key = "copy_files_to_volume"
   ,depends_on = [TaskDependency(
