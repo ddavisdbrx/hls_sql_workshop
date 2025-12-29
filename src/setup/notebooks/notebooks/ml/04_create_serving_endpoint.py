@@ -51,7 +51,7 @@ from databricks.sdk.service.database import (
 )
 
 # add a wait time when the database instance is still being provisioned
-max_wait_minutes = 15
+max_wait_minutes = 20
 wait_interval_seconds = 60
 attempts = 0
 
@@ -61,8 +61,8 @@ while attempts < max_wait_minutes:
   try:
     synced_table = w.database.create_synced_database_table(
         SyncedDatabaseTable(
-            name=f"{catalog}.ai.feature_beneficiary_synced",
-            database_instance_name="hls-sql-workshop-new-new",
+            name=f"{catalog}.ai.feature_beneficiary_synced_new",
+            database_instance_name="hls-sql-workshop",
             logical_database_name=f"{catalog}",
             spec=SyncedTableSpec(
                 source_table_full_name=f"{catalog}.ai.feature_beneficiary",

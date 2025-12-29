@@ -18,7 +18,7 @@ w = WorkspaceClient()
 try:
  instance = w.database.create_database_instance(
     DatabaseInstance(
-        name = f"hls-sql-workshop-new-new",
+        name = f"hls-sql-workshop",
         capacity="CU_1"
     )
   )
