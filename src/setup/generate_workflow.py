@@ -359,7 +359,7 @@ create_online_table = Task(
   ,run_if = RunIf("ALL_SUCCESS")
   ,job_cluster_key = job_cluster_key  
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/ml/03_create_online_table"
+    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/ml/03_create_database_instance"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )

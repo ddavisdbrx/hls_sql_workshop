@@ -87,7 +87,7 @@ columns_to_convert = [
 ]
 
 X = df_train.drop("claim_amount", axis=1)
-y = df_train["claim_amount"]    
+y = df_train["claim_amount"]
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -109,7 +109,7 @@ categorical_imputer = SimpleImputer(strategy="most_frequent")
 # Pipeline for preprocessing
 categorical_transformer = Pipeline(steps=[
     ("imputer", categorical_imputer),
-    ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
+    ("encoder", OneHotEncoder(handle_unknown="ignore"))
 ])
 
 boolean_transformer = Pipeline(steps=[
@@ -123,6 +123,12 @@ preprocessor = ColumnTransformer(
     ],
     remainder="passthrough"  # Pass date-processed columns through
 )
+
+# COMMAND ----------
+
+for df in [df_train, X, X_train, X_test]:
+    for col in df.select_dtypes(include=["int32"]).columns:
+        df[col] = df[col].astype("int64")
 
 # COMMAND ----------
 
@@ -179,4 +185,5 @@ latest_model_version = max([model_version_info.version for model_version_info in
 
 # move the model in production
 print(f"registering model version {model_name}.{latest_model_version} as production model")
+
 client.set_registered_model_alias(model_name, "Production", latest_model_version)

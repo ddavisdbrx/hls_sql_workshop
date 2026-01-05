@@ -5,6 +5,10 @@ print(f'catalog = {catalog}')
 
 # COMMAND ----------
 
+# MAGIC %pip install databricks-sdk==0.76.0
+
+# COMMAND ----------
+
 # MAGIC %pip install mlflow typing_extensions==4.4.0
 
 # COMMAND ----------
@@ -31,6 +35,60 @@ model_version_info = client.get_model_version_by_alias(model_name, alias)
 model_version = model_version_info.version
 
 print(f'Model name: {model_name} \nModel version for alias "{alias}": {model_version}')
+
+# COMMAND ----------
+
+# DBTITLE 1,create synced table
+# create synced table
+
+import time
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.database import (
+    SyncedDatabaseTable,
+    SyncedTableSpec,
+    NewPipelineSpec,
+    SyncedTableSchedulingPolicy
+)
+
+# add a wait time when the database instance is still being provisioned
+max_wait_minutes = 20
+wait_interval_seconds = 60
+attempts = 0
+
+w = WorkspaceClient()
+
+while attempts < max_wait_minutes:
+  try:
+    synced_table = w.database.create_synced_database_table(
+        SyncedDatabaseTable(
+            name=f"{catalog}.ai.feature_beneficiary_synced",
+            database_instance_name="hls-sql-workshop",
+            logical_database_name=f"{catalog}",
+            spec=SyncedTableSpec(
+                source_table_full_name=f"{catalog}.ai.feature_beneficiary",
+                primary_key_columns=["beneficiary_code"],
+                scheduling_policy=SyncedTableSchedulingPolicy.SNAPSHOT,
+                create_database_objects_if_missing=True,
+                new_pipeline_spec=NewPipelineSpec(
+                    storage_catalog=f"{catalog}",
+                    storage_schema="ai"
+                )
+            ),
+        )
+    )
+    print(f"Created synced table: {synced_table.name}")
+    break
+  except Exception as e:
+      error_msg = str(e).lower()
+      if "already exists" in error_msg:
+          print(f"Synced table name already exists: {catalog}.ai.feature_beneficiary_synced")
+          break
+      elif "starting state" in error_msg:
+          attempts += 1
+          print(f"{e} \nWaiting 1 minute before retrying (max 15 minutes)... \nAttempt: ({attempts}/{max_wait_minutes})")
+          time.sleep(wait_interval_seconds)
+      else:
+          raise e
 
 # COMMAND ----------
 
