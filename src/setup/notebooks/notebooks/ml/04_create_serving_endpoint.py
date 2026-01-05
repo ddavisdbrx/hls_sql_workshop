@@ -61,7 +61,7 @@ while attempts < max_wait_minutes:
   try:
     synced_table = w.database.create_synced_database_table(
         SyncedDatabaseTable(
-            name=f"{catalog}.ai.feature_beneficiary_synced_new",
+            name=f"{catalog}.ai.feature_beneficiary_synced",
             database_instance_name="hls-sql-workshop",
             logical_database_name=f"{catalog}",
             spec=SyncedTableSpec(
@@ -103,7 +103,7 @@ try:
         config={
             "served_entities": [
                 {
-                    "name": "predict_claims_amount_entity_test",
+                    "name": "predict_claims_amount_entity",
                     "entity_name": f"{catalog}.ai.predict_claims_amount_model",
                     "entity_version": f"{model_version}",
                     "workload_size": "Small",
