@@ -45,7 +45,7 @@ print(f'User name: {user_name}')
 # COMMAND ----------
 
 # DBTITLE 1,set notebook paths
-notebook_path = f"/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/dlt/"
+notebook_path = f"/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/dlt-sql/solution/"
 
 bronze_path = notebook_path + "01_bronze_load_tables"
 silver_path = notebook_path + "02_silver_load_tables"

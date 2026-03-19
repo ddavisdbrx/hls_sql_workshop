@@ -147,7 +147,7 @@ uc_setup = Task(
   ,description = "Create UC objects for hls SQL workshop"
   ,job_cluster_key = job_cluster_key
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/uc_setup"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/uc_setup"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -173,7 +173,7 @@ create_sql_warehouse = Task(
   )]  
   ,job_cluster_key = job_cluster_key
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/create_sql_warehouse"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/create_sql_warehouse"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -199,7 +199,7 @@ copy_files_to_volume = Task(
   ,run_if = RunIf("ALL_DONE")
   ,job_cluster_key = job_cluster_key  
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/copy_files_to_volume"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/copy_files_to_volume"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -253,7 +253,7 @@ copy_gold_tables_add_metadata = Task(
   ,run_if = RunIf("ALL_SUCCESS")
   ,job_cluster_key = job_cluster_key
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/gold_copy_tables_add_metadata"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/gold_copy_tables_add_metadata"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -279,7 +279,7 @@ build_feature_store_beneficiary = Task(
   ,run_if = RunIf("ALL_SUCCESS")
   ,job_cluster_key = job_cluster_key
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/ml/01_build_training_dataset"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/ml/01_build_training_dataset"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -305,7 +305,7 @@ ml_train_and_register_model = Task(
   ,run_if = RunIf("ALL_SUCCESS")
   ,job_cluster_key = job_cluster_key
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/ml/02_ml_train_and_register_model"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/ml/02_ml_train_and_register_model"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -331,7 +331,7 @@ create_online_table = Task(
   ,run_if = RunIf("ALL_SUCCESS")
   ,job_cluster_key = job_cluster_key  
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/ml/03_create_online_table"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/ml/03_create_online_table"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
@@ -357,7 +357,7 @@ create_serving_endpoint = Task(
   ,run_if = RunIf("ALL_SUCCESS")
   ,job_cluster_key = job_cluster_key  
   ,notebook_task = NotebookTask(
-    notebook_path = f"/Workspace/Users/{user_name}/hls_sql_workshop/src/setup/notebooks/notebooks/ml/04_create_serving_endpoint"
+    notebook_path = f"/Workspace/Users/{user_name}/Projects/hls_sql_workshop/src/setup/notebooks/notebooks/ml/04_create_serving_endpoint"
     ,source = Source("WORKSPACE")
     ,base_parameters = dict("")
   )
